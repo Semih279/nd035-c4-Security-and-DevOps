@@ -52,7 +52,7 @@ public class UserController {
 		boolean hasPasswordEnoughCharacters = createUserRequest.getPassword().length() >= 8 ;
 		boolean isValidatedWithConfirmpassword = createUserRequest.getPassword().equals(createUserRequest.getConfirmPassword());
 		if (!hasPasswordEnoughCharacters || !isValidatedWithConfirmpassword) {
-			ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest().build();
 
 		}
 		user.setPassword(encoder.encode(createUserRequest.getPassword()));
