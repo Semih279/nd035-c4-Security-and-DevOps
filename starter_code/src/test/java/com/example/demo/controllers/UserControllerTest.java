@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
+import static com.example.demo.controllers.TestUtils.createTestUser;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
@@ -33,13 +34,7 @@ public class UserControllerTest {
         TestUtils.injectObjects(userController,"encoder", bCryptPasswordEncoder);
     }
 
-    User createTestUser() {
-        User testUser = new User();
-        testUser.setId(0);
-        testUser.setUsername("testUser");
-        testUser.setPassword("testPassword");
-        return  testUser;
-    }
+
 
     @Test
     public void createUserHappyPath() throws Exception {
@@ -78,7 +73,6 @@ public class UserControllerTest {
         request.setUsername("semih");
         request.setPassword("passdsfdsfdsfdsf");
         request.setConfirmPassword("dsfdsfdsfdsf");
-
         ResponseEntity<User> responseEntity = userController.createUser(request);
         assertNotNull(responseEntity);
         assertEquals(400, responseEntity.getStatusCodeValue());
@@ -86,33 +80,26 @@ public class UserControllerTest {
 
     @Test
     public void findUserByIdHappyPath() throws Exception {
-
         User user = createTestUser();
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-
         ResponseEntity<User> response = userController.findById(user.getId());
+        assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
-
     }
     @Test
     public void findUserByIdWrongPath() throws Exception {
-
         User user = createTestUser();
-
         ResponseEntity<User> response = userController.findById(user.getId());
+        assertNotNull(response);
         assertEquals(404, response.getStatusCodeValue());
-
     }
 
     @Test
     public void findUserByNameHappyPath() throws Exception {
-
         User user = createTestUser();
-
+        when(userRepository.findByUsername(user.getUsername())).thenReturn(user);
         ResponseEntity<User> response = userController.findByUserName(user.getUsername());
-        assertEquals(404, response.getStatusCodeValue());
-
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
     }
-
-
 }

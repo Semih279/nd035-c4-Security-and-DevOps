@@ -2,6 +2,9 @@ package com.example.demo.controllers;
 
 import java.util.Optional;
 
+import com.example.demo.security.UserDetailsServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +25,7 @@ import com.example.demo.model.requests.CreateUserRequest;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+	static Logger logger = LoggerFactory.getLogger(UserController.class);
 	
 	@Autowired
 	private UserRepository userRepository;
@@ -52,9 +56,11 @@ public class UserController {
 		boolean hasPasswordEnoughCharacters = createUserRequest.getPassword().length() >= 8 ;
 		boolean isValidatedWithConfirmpassword = createUserRequest.getPassword().equals(createUserRequest.getConfirmPassword());
 		if (!hasPasswordEnoughCharacters || !isValidatedWithConfirmpassword) {
+			logger.info("Create User request failures");
 			return ResponseEntity.badRequest().build();
 
 		}
+		logger.info("CreateUser request successes");
 		user.setPassword(encoder.encode(createUserRequest.getPassword()));
 		userRepository.save(user);
 		return ResponseEntity.ok(user);
