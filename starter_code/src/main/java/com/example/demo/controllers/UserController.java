@@ -2,9 +2,13 @@ package com.example.demo.controllers;
 
 import java.util.Optional;
 
+import com.example.demo.security.UserDetailsServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,12 +25,15 @@ import com.example.demo.model.requests.CreateUserRequest;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+	static Logger logger = LoggerFactory.getLogger(UserController.class);
 	
 	@Autowired
 	private UserRepository userRepository;
 	
 	@Autowired
 	private CartRepository cartRepository;
+	@Autowired
+	private BCryptPasswordEncoder encoder;
 
 	@GetMapping("/id/{id}")
 	public ResponseEntity<User> findById(@PathVariable Long id) {
@@ -46,6 +53,15 @@ public class UserController {
 		Cart cart = new Cart();
 		cartRepository.save(cart);
 		user.setCart(cart);
+		boolean hasPasswordEnoughCharacters = createUserRequest.getPassword().length() >= 8 ;
+		boolean isValidatedWithConfirmpassword = createUserRequest.getPassword().equals(createUserRequest.getConfirmPassword());
+		if (!hasPasswordEnoughCharacters || !isValidatedWithConfirmpassword) {
+			logger.info("Create User request failures");
+			return ResponseEntity.badRequest().build();
+
+		}
+		logger.info("CreateUser request successes");
+		user.setPassword(encoder.encode(createUserRequest.getPassword()));
 		userRepository.save(user);
 		return ResponseEntity.ok(user);
 	}
